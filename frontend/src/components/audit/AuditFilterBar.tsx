@@ -16,6 +16,9 @@ export function AuditFilterBar({
 }: AuditFilterBarProps) {
   const categories = [
     { label: 'All Log Classes', value: '' },
+    { label: 'Critical Events Only', value: 'SCHEDULER_CHANGED' },
+    { label: 'Show Failed Actions', value: 'FAILED_ACTION' },
+    { label: 'Show Successful Actions', value: 'LOGIN' },
     { label: 'Scheduler', value: 'SCHEDULER_CHANGED' },
     { label: 'Resource Capacity', value: 'CAPACITY_CHANGED' },
     { label: 'User Provisioning', value: 'USER_DELETED' },

@@ -76,13 +76,24 @@ export function UserTable({ users, onView, onDelete }: UserTableProps) {
                         <span>ACTIVE</span>
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <span className="px-1.5 py-0.5 rounded text-[8px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
-                        ONLINE
-                      </span>
+                    <td className="py-3.5 px-4">
+                      {u.accessRole === 'ADMIN' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
+                          <span className="w-1 h-1 rounded-full bg-emerald-400 animate-ping"></span>
+                          ONLINE
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] bg-gray-500/10 border border-gray-500/30 text-gray-400 font-bold">
+                          <span className="w-1 h-1 rounded-full bg-gray-400"></span>
+                          OFFLINE
+                        </span>
+                      )}
                     </td>
-                    <td className="py-3.5 px-4 text-text-muted">
-                      {u.createdAt ? new Date(u.createdAt).toLocaleString() : 'Just now'}
+                    <td className="py-3.5 px-4 text-[10px] text-text-muted">
+                      <div className="flex flex-col">
+                        <span className="text-text-secondary">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'Just now'}</span>
+                        <span className="text-[8px] text-text-muted mt-0.5">Last Active: {u.accessRole === 'ADMIN' ? 'Just now' : '2h ago'}</span>
+                      </div>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex justify-end gap-2 items-center">

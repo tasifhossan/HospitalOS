@@ -27,6 +27,8 @@ export function SchedulerControlCard({
     { label: 'Round Robin', value: 'ROUND_ROBIN' },
   ];
 
+  const [activeModal, setActiveModal] = useState<'NONE' | 'PAUSE' | 'RESET'>('NONE');
+
   const handleStart = async () => {
     setLoading(true);
     try {
@@ -40,6 +42,7 @@ export function SchedulerControlCard({
   };
 
   const handleStop = async () => {
+    setActiveModal('NONE');
     setLoading(true);
     try {
       const res = await simulationService.stop();
@@ -52,6 +55,7 @@ export function SchedulerControlCard({
   };
 
   const handleReset = async () => {
+    setActiveModal('NONE');
     setLoading(true);
     try {
       const res = await simulationService.reset();
@@ -141,7 +145,7 @@ export function SchedulerControlCard({
         </button>
         <button
           disabled={loading || !isRunning}
-          onClick={handleStop}
+          onClick={() => setActiveModal('PAUSE')}
           className="px-4 py-2 bg-danger hover:bg-danger-hover text-white rounded font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all"
         >
           <Square className="w-3.5 h-3.5" />
@@ -149,13 +153,44 @@ export function SchedulerControlCard({
         </button>
         <button
           disabled={loading}
-          onClick={handleReset}
+          onClick={() => setActiveModal('RESET')}
           className="px-4 py-2 bg-surface-elevated hover:bg-surface border border-border text-text-primary rounded font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset Kernel Queues</span>
         </button>
       </div>
+
+      {/* Confirmation Dialog System */}
+      {activeModal !== 'NONE' && (
+        <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-surface/85 backdrop-blur-md" onClick={() => setActiveModal('NONE')} />
+          <div className="relative w-full max-w-sm bg-surface border border-border p-6 rounded-lg shadow-2xl space-y-4">
+            <h3 className="font-bold text-sm text-text-primary uppercase tracking-wide">
+              {activeModal === 'PAUSE' ? 'Pause Scheduler?' : 'Reset Scheduler?'}
+            </h3>
+            <p className="text-[11px] text-text-muted leading-relaxed">
+              {activeModal === 'PAUSE'
+                ? 'Running requests will continue, but no new requests will be scheduled.'
+                : 'Warning: This will flush all waiting queue patients and restore standard resource lock capacities.'}
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setActiveModal('NONE')}
+                className="px-4 py-1.5 bg-surface-elevated hover:bg-surface border border-border rounded font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={activeModal === 'PAUSE' ? handleStop : handleReset}
+                className="px-4 py-1.5 bg-danger hover:bg-danger-hover text-white rounded font-semibold"
+              >
+                {activeModal === 'PAUSE' ? 'Pause' : 'Reset'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
