@@ -92,7 +92,7 @@ export default function SchedulingOverviewPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           <SchedulerCard
             algorithm={snapshot?.activeScheduler ?? 'FCFS'}
-            efficiency={snapshot ? Math.min(Math.round(100 - (snapshot.readyQueue.length * 3.5)), 98) : 95}
+            efficiency={snapshot ? Math.min(Math.round(100 - ((snapshot.readyQueue || []).length * 3.5)), 98) : 95}
             timeQuantum={100}
             tickRate={1}
           />

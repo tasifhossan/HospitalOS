@@ -106,7 +106,7 @@ export function SchedulerControlCard({
         <div>
           <span className="block text-[8px] text-text-muted">ACTIVE ALGORITHM POLICY</span>
           <span className="text-xs font-bold text-text-primary uppercase">
-            {currentAlgorithm.replace('_', ' ')}
+            {(currentAlgorithm || 'FCFS').replace('_', ' ')}
           </span>
         </div>
       </div>

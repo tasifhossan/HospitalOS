@@ -109,7 +109,7 @@ export default function SystemMonitorPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-text-muted">Active Processes:</span>
-                <span className="text-text-primary font-bold">{(snapshot?.inTreatment.length ?? 0) + (snapshot?.readyQueue.length ?? 0)} threads</span>
+                <span className="text-text-primary font-bold">{((snapshot?.inTreatment || []).length) + ((snapshot?.readyQueue || []).length)} threads</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-text-muted">Clock Tick Rate:</span>
@@ -171,13 +171,13 @@ export default function SystemMonitorPage() {
                     <span className="text-text-secondary font-medium">Active algorithm configured</span>
                     <span className="text-primary text-[10px]">{snapshot.activeScheduler}</span>
                   </div>
-                  {snapshot.readyQueue.map((p) => (
+                  {(snapshot.readyQueue || []).map((p) => (
                     <div key={p.id} className="py-2 flex justify-between">
                       <span className="text-text-muted">New Patient Request: {p.name}</span>
                       <span className="text-warning text-[10px]">Ready</span>
                     </div>
                   ))}
-                  {snapshot.inTreatment.map((p) => (
+                  {(snapshot.inTreatment || []).map((p) => (
                     <div key={p.id} className="py-2 flex justify-between">
                       <span className="text-text-secondary">Resource Allocated (Doctor): {p.name}</span>
                       <span className="text-success text-[10px]">Treatment</span>

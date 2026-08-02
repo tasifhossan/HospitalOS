@@ -49,7 +49,7 @@ export function SystemStatusProvider({ children }: { children: ReactNode }) {
       setSchedulerStatus('Running');
       if (snapshot.deadlockDetected) {
         setHealth('Critical');
-      } else if (snapshot.readyQueue.length > 15) {
+      } else if ((snapshot.readyQueue || []).length > 15) {
         setHealth('Warning');
       } else {
         setHealth('Healthy');

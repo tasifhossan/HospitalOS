@@ -32,14 +32,14 @@ export default function ResourceManagerPage() {
   };
 
   const getCapacity = (type: string, defaultVal = 5) => {
-    if (!snapshot) return defaultVal;
-    const r = snapshot.resources.find((item) => item.type === type);
+    if (!snapshot || !snapshot.resources) return defaultVal;
+    const r = (snapshot.resources || []).find((item) => item.type === type);
     return r ? r.capacity : defaultVal;
   };
 
   const getAvailable = (type: string, defaultVal = 5) => {
-    if (!snapshot) return defaultVal;
-    const r = snapshot.resources.find((item) => item.type === type);
+    if (!snapshot || !snapshot.resources) return defaultVal;
+    const r = (snapshot.resources || []).find((item) => item.type === type);
     return r ? r.available : defaultVal;
   };
 
@@ -60,7 +60,7 @@ export default function ResourceManagerPage() {
   const resourcesData = resourcesList.map((r) => {
     const allocated = r.capacity - r.available;
     const utilization = Math.round((allocated / r.capacity) * 100);
-    const waiting = snapshot ? snapshot.readyQueue.filter((p) => p.requiredResources.includes(r.type as any)).length : 0;
+    const waiting = snapshot ? (snapshot.readyQueue || []).filter((p) => (p.requiredResources || []).includes(r.type as any)).length : 0;
     const status = getResourceStatus(r.type, r.capacity, r.available);
     return {
       ...r,
@@ -82,7 +82,7 @@ export default function ResourceManagerPage() {
     id: p.id,
     resourceName: p.requiredResources[0] ?? 'General Bed',
     patientName: p.name,
-    queueLength: snapshot?.readyQueue.length ?? 0,
+    queueLength: (snapshot?.readyQueue || []).length,
     durationMs: p.treatmentDurationMs,
     priority: p.priority,
   }));
@@ -223,7 +223,7 @@ export default function ResourceManagerPage() {
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           resource={selectedRow}
-          waitingQueue={snapshot?.readyQueue.filter((p) => selectedRow && p.requiredResources.includes(selectedRow.type)) ?? []}
+          waitingQueue={(snapshot?.readyQueue || []).filter((p) => selectedRow && (p.requiredResources || []).includes(selectedRow.type)) || []}
         />
       </PageShell>
     </UnifiedDashboardLayout>

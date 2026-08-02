@@ -54,8 +54,8 @@ export default function DashboardPage() {
 
   // Compute available counting semaphore resources from WebSocket resource state
   const getResourceAvailable = (type: string) => {
-    if (!snapshot) return '—';
-    const res = snapshot.resources.find((r) => r.type === type);
+    if (!snapshot || !snapshot.resources) return '—';
+    const res = (snapshot.resources || []).find((r) => r.type === type);
     return res ? `${res.available} / ${res.capacity}` : '—';
   };
 
@@ -127,7 +127,7 @@ export default function DashboardPage() {
         <DashboardGrid>
           <MetricCard
             title="Running Processes"
-            value={snapshot?.inTreatment.length ?? 0}
+            value={(snapshot?.inTreatment || []).length}
             icon={Activity}
             statusColor="success"
             statusText="Allocated"
@@ -135,7 +135,7 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="Ready Queue"
-            value={snapshot?.readyQueue.length ?? 0}
+            value={(snapshot?.readyQueue || []).length}
             icon={Clock}
             statusColor="warning"
             statusText="Waiting"
@@ -143,7 +143,7 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="Waiting Queue"
-            value={snapshot?.stats.waiting ?? 0}
+            value={snapshot?.stats?.waiting ?? 0}
             icon={AlertTriangle}
             statusColor="danger"
             statusText="Waiting"
@@ -151,7 +151,7 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="Completed Processes"
-            value={snapshot?.completed.length ?? 0}
+            value={(snapshot?.completed || []).length}
             icon={FileText}
             statusColor="info"
             statusText="Completed"

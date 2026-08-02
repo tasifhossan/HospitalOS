@@ -67,11 +67,11 @@ export function TopHeader() {
             <>
               <div className="flex flex-col">
                 <span className="text-[9px] text-text-muted font-mono">Q(R)</span>
-                <span className="font-semibold text-warning">{snapshot.readyQueue.length}</span>
+                <span className="font-semibold text-warning">{(snapshot.readyQueue || []).length}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] text-text-muted">P(T)</span>
-                <span className="font-semibold text-success">{snapshot.inTreatment.length}</span>
+                <span className="font-semibold text-success">{(snapshot.inTreatment || []).length}</span>
               </div>
             </>
           )}

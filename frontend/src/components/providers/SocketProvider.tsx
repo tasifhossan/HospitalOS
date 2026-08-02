@@ -49,9 +49,37 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const s = connectSocket(token);
     socketRef.current = s;
 
+    const normalizeSnapshot = (data: any): SimulationSnapshot => {
+      const defaultStats = {
+        totalPatients: 0,
+        completed: 0,
+        waiting: 0,
+        inTreatment: 0,
+        avgWaitTimeMs: 0,
+        avgTreatmentTimeMs: 0,
+        throughput: 0,
+      };
+
+      return {
+        tick: data?.tick ?? 0,
+        simulatedTimeMs: data?.simulatedTimeMs ?? 0,
+        activeScheduler: data?.activeScheduler ?? 'FCFS',
+        readyQueue: data?.readyQueue ?? [],
+        inTreatment: data?.inTreatment ?? [],
+        completed: data?.completed ?? [],
+        resources: data?.resources ?? [],
+        deadlockDetected: data?.deadlockDetected ?? false,
+        deadlockCycle: data?.deadlockCycle ?? [],
+        stats: {
+          ...defaultStats,
+          ...(data?.stats || {}),
+        },
+      };
+    };
+
     s.on('connect', () => setIsConnected(true));
     s.on('disconnect', () => setIsConnected(false));
-    s.on('simulation:state', (data: SimulationSnapshot) => setSnapshot(data));
+    s.on('simulation:state', (data: any) => setSnapshot(normalizeSnapshot(data)));
     s.on('deadlock:detected', (data: DeadlockDetectedEvent) => setLastDeadlock(data));
     s.on('scheduler:changed', (data: SchedulerChangedEvent) => setLastSchedulerChange(data));
     s.on('resource:capacityChanged', (data: ResourceCapacityChangedEvent) => setLastCapacityChange(data));

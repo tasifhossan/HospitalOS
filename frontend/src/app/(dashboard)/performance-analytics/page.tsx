@@ -49,8 +49,8 @@ export default function PerformanceAnalyticsPage() {
       const timeLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
       // Simulate CPU load trend mapped from scheduler length & utilization
-      const calculatedCpu = Math.min(100, Math.floor(10 + (activeSnapshot.readyQueue.length * 5) + (activeSnapshot.inTreatment.length * 15)));
-      const calculatedMem = Math.min(100, Math.floor(35 + (activeSnapshot.completed.length % 30)));
+      const calculatedCpu = Math.min(100, Math.floor(10 + ((activeSnapshot.readyQueue || []).length * 5) + ((activeSnapshot.inTreatment || []).length * 15)));
+      const calculatedMem = Math.min(100, Math.floor(35 + ((activeSnapshot.completed || []).length % 30)));
       const calculatedThroughput = activeSnapshot.stats?.throughput || 0;
 
       setCpuHistory((prev) => [...prev.slice(-15), { time: timeLabel, value: calculatedCpu }]);
@@ -60,9 +60,9 @@ export default function PerformanceAnalyticsPage() {
         ...prev.slice(-15),
         {
           time: timeLabel,
-          ready: activeSnapshot.readyQueue.length,
+          ready: (activeSnapshot.readyQueue || []).length,
           waiting: activeSnapshot.stats?.waiting || 0,
-          completed: activeSnapshot.completed.length,
+          completed: (activeSnapshot.completed || []).length,
         },
       ]);
     }
@@ -100,7 +100,7 @@ export default function PerformanceAnalyticsPage() {
   const getPerformanceScore = () => {
     if (!activeSnapshot) return { score: 94, rating: 'Excellent' };
     const waitPenalty = Math.min(30, Math.floor((activeSnapshot.stats?.avgWaitTimeMs || 120) / 15));
-    const readyQueuePenalty = Math.min(20, activeSnapshot.readyQueue.length * 2);
+    const readyQueuePenalty = Math.min(20, (activeSnapshot.readyQueue || []).length * 2);
     const cpuReward = Math.min(10, Math.floor((cpuHistory[cpuHistory.length - 1]?.value || 10) / 10));
     
     const score = Math.max(50, Math.min(100, 100 - waitPenalty - readyQueuePenalty + cpuReward));
