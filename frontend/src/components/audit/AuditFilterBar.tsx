@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -46,8 +47,8 @@ export function AuditFilterBar({
             onChange={(e) => onCategoryChange(e.target.value)}
             className="w-full sm:w-48 bg-surface-elevated border border-border p-2 rounded outline-none text-text-primary focus:border-primary/50 text-xs"
           >
-            {categories.map((c) => (
-              <option key={c.value} value={c.value}>
+            {categories.map((c, idx) => (
+              <option key={`${c.value}-${idx}`} value={c.value}>
                 {c.label}
               </option>
             ))}
