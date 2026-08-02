@@ -1,31 +1,74 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageShell } from '@/components/shared/PageShell';
-import { ClipboardList } from 'lucide-react';
-
 import { UnifiedDashboardLayout } from '@/components/layout/RoleLayouts';
+import { AuditTable } from '@/components/audit/AuditTable';
+import { AuditTimeline } from '@/components/audit/AuditTimeline';
+import { AuditFilterBar } from '@/components/audit/AuditFilterBar';
+import { auditService } from '@/services/auditService';
+import type { AuditLog } from '@/types/audit';
 
 export default function AuditLogsPage() {
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(15);
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+
+  const fetchLogs = () => {
+    const params: any = {
+      page,
+      limit,
+    };
+    if (search) {
+      params.userEmail = search;
+    }
+    if (category) {
+      params.action = category;
+    }
+
+    auditService.list(params)
+      .then((data) => {
+        if (data) {
+          setLogs(data.logs || []);
+          setTotal(data.pagination?.total || 0);
+        }
+      })
+      .catch((err) => console.error(err));
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, [page, search, category]);
+
   return (
     <UnifiedDashboardLayout>
       <PageShell
         title="Audit Logs"
-        subtitle="Kernel system action trace logs (Tamper-evident)"
+        subtitle="Kernel system action trace logs & event security registry"
       >
-        <div className="flex flex-col items-center justify-center py-20 px-6 rounded-xl border border-dashed border-border bg-surface/50 text-center">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-info-muted border border-info/30 glow-info mb-4">
-            <ClipboardList className="w-7 h-7 text-info" />
-          </div>
-          <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Audit Logs</h3>
-          <p className="text-sm max-w-md mb-4" style={{ color: 'var(--text-muted)' }}>
-            Trace log tracking privileges elevations, file downloads, user register events, and scheduler swaps.
-          </p>
-          <div
-            className="px-3 py-1.5 rounded-lg text-[11px] font-mono"
-            style={{ background: 'var(--surface-elevated)', color: 'var(--info)', border: '1px solid var(--border)' }}
-          >
-            Endpoint: GET /api/audit
+        <div className="space-y-6">
+          <AuditFilterBar
+            onSearchChange={setSearch}
+            onCategoryChange={setCategory}
+            category={category}
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AuditTable
+                logs={logs}
+                total={total}
+                page={page}
+                limit={limit}
+                onPageChange={setPage}
+              />
+            </div>
+            <div>
+              <AuditTimeline logs={logs} />
+            </div>
           </div>
         </div>
       </PageShell>

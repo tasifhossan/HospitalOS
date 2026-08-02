@@ -4,6 +4,7 @@ import type { AuditListParams, AuditListResponse } from '@/types/audit';
 export const auditService = {
   async list(params?: AuditListParams): Promise<AuditListResponse> {
     const { data } = await api.get<{ success: boolean; data: AuditListResponse }>('/audit', { params });
+    // If backend returns data wrapped in data.data or similar
     return data.data;
   },
 };

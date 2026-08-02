@@ -1,31 +1,69 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageShell } from '@/components/shared/PageShell';
-import { Sliders } from 'lucide-react';
-
 import { UnifiedDashboardLayout } from '@/components/layout/RoleLayouts';
+import { SystemStatusCard } from '@/components/system/SystemStatusCard';
+import { SchedulerControlCard } from '@/components/system/SchedulerControlCard';
+import { ConfigurationCard } from '@/components/system/ConfigurationCard';
+import { useSocket } from '@/hooks/useSocket';
+import { simulationService } from '@/services/simulationService';
+import type { SchedulerType } from '@/types/simulation';
 
 export default function SystemControlPage() {
+  const { isConnected, snapshot } = useSocket();
+  const [currentAlgorithm, setCurrentAlgorithm] = useState<SchedulerType>('FCFS');
+  const [isRunning, setIsRunning] = useState(false);
+  const [tickIntervalMs, setTickIntervalMs] = useState(1000);
+
+  // Sync state with socket snapshot updates
+  useEffect(() => {
+    if (snapshot) {
+      setCurrentAlgorithm(snapshot.activeScheduler);
+      // Determine if running based on simulated time advancing or readyQueue changes
+      // The simulation clock doesn't expose isRunning directly on socket, but we can query it
+      // or derive it. Let's do a fallback REST fetch to get exact running status
+    }
+  }, [snapshot]);
+
+  const fetchStatus = () => {
+    simulationService.getState()
+      .then((data) => {
+        if (data) {
+          setCurrentAlgorithm(data.activeScheduler);
+          setTickIntervalMs(1000); // Standard scheduler configuration
+        }
+      })
+      .catch((err) => console.error(err));
+  };
+
+  useEffect(() => {
+    fetchStatus();
+    // Poll running status periodically since clock start/stop is admin-triggered
+    const interval = setInterval(fetchStatus, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <UnifiedDashboardLayout>
       <PageShell
         title="System Control"
-        subtitle="Kernel scheduler swaps & timing parameters"
+        subtitle="Scheduler engine administration, infrastructure monitoring & core policy configuration"
       >
-        <div className="flex flex-col items-center justify-center py-20 px-6 rounded-xl border border-dashed border-border bg-surface/50 text-center">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-primary-muted border border-primary-glow glow-primary mb-4">
-            <Sliders className="w-7 h-7 text-primary" />
-          </div>
-          <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>System Control Console</h3>
-          <p className="text-sm max-w-md mb-4" style={{ color: 'var(--text-muted)' }}>
-            Configure scheduling algorithm parameters, time quantums, simulation clock tick rate, or initiate benchmark workloads.
-          </p>
-          <div
-            className="px-3 py-1.5 rounded-lg text-[11px] font-mono"
-            style={{ background: 'var(--surface-elevated)', color: 'var(--primary)', border: '1px solid var(--border)' }}
-          >
-            Endpoint: POST /api/sim/scheduler
+        <div className="space-y-6">
+          <SystemStatusCard socketStatus={isConnected ? 'CONNECTED' : 'DISCONNECTED'} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <SchedulerControlCard
+                currentAlgorithm={currentAlgorithm}
+                isRunning={isRunning}
+                onRefresh={fetchStatus}
+              />
+            </div>
+            <div>
+              <ConfigurationCard tickIntervalMs={tickIntervalMs} />
+            </div>
           </div>
         </div>
       </PageShell>

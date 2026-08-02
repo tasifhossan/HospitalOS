@@ -4,6 +4,14 @@ export interface AuthUser {
   id: string;
   email: string;
   accessRole: AccessRole;
+  staffMemberId?: string | null;
+  staffMember?: {
+    id: string;
+    name: string;
+    role: string;
+    status: string;
+  } | null;
+  createdAt?: string;
 }
 
 export interface AuthState {

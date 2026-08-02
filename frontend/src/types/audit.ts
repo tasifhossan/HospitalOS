@@ -30,13 +30,18 @@ export interface AuditLog {
 }
 
 export interface AuditListParams {
+  action?: string;
+  userEmail?: string;
+  page?: number;
   limit?: number;
-  offset?: number;
 }
 
 export interface AuditListResponse {
   logs: AuditLog[];
-  total: number;
-  limit: number;
-  offset: number;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
