@@ -10,6 +10,7 @@ import type { RegisteredPatient } from '@/types/patient';
 import type { Appointment } from '@/types/appointment';
 import type { StaffMember } from '@/types/staff';
 import { useSocket } from '@/hooks/useSocket';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Calendar,
   UserPlus,
@@ -24,6 +25,7 @@ import {
 
 export default function ReceptionistPage() {
   const { snapshot } = useSocket();
+  const { user } = useAuth();
   const [patients, setPatients] = useState<RegisteredPatient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
@@ -68,6 +70,7 @@ export default function ReceptionistPage() {
         condition: regCondition,
         priority: regPriority,
         requiredResources: regResources as any[],
+        registeredBy: user?.id || 'demo-receptionist',
       });
       setMessage(`Patient [${regName}] registered successfully.`);
       setRegName('');

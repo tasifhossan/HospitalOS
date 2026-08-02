@@ -1,5 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useSocket } from '@/hooks/useSocket';
+import { adminService } from '@/services/adminService';
+
 import { PageShell } from '@/components/shared/PageShell';
 import { StatCard } from '@/components/shared/StatCard';
 import { LayoutDashboard, Users, Cpu, Shield, Activity, AlertTriangle } from 'lucide-react';
@@ -7,6 +11,19 @@ import { LayoutDashboard, Users, Cpu, Shield, Activity, AlertTriangle } from 'lu
 import { AdminLayout } from '@/components/layout/RoleLayouts';
 
 export default function AdminPage() {
+  const { snapshot } = useSocket();
+  const [totalUsers, setTotalUsers] = useState<number | string>('—');
+
+  useEffect(() => {
+    adminService.listUsers()
+      .then((users) => setTotalUsers(users.length))
+      .catch(() => setTotalUsers('Error'));
+  }, []);
+
+  const activePatients = snapshot ? (snapshot.readyQueue.length + snapshot.inTreatment.length) : '—';
+  const scheduler = snapshot?.activeScheduler || '—';
+  const deadlocks = snapshot?.stats?.deadlocks ?? '—';
+
   return (
     <AdminLayout>
       <PageShell
@@ -15,10 +32,10 @@ export default function AdminPage() {
       >
         {/* Stat cards placeholder grid */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-          <StatCard title="Total Users" value="—" icon={Users} variant="primary" />
-          <StatCard title="Active Patients" value="—" icon={Activity} variant="success" />
-          <StatCard title="Scheduler" value="—" icon={Cpu} variant="info" />
-          <StatCard title="Deadlocks" value="—" icon={AlertTriangle} variant="danger" />
+          <StatCard title="Total Users" value={totalUsers.toString()} icon={Users} variant="primary" />
+          <StatCard title="Active Patients" value={activePatients.toString()} icon={Activity} variant="success" />
+          <StatCard title="Scheduler" value={scheduler.toString()} icon={Cpu} variant="info" />
+          <StatCard title="Deadlocks" value={deadlocks.toString()} icon={AlertTriangle} variant="danger" />
         </div>
 
         {/* Coming soon notice */}

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { ROLE_ROUTES, ROLE_HOME } from '@/types/auth';
 
 interface SidebarItem {
   label: string;
@@ -44,7 +45,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
 
   return (
     <motion.aside
@@ -82,15 +83,27 @@ export function Sidebar() {
 
       {/* Main navigation item links */}
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-        {SIDEBAR_ITEMS.map((item) => {
+        {SIDEBAR_ITEMS.filter((item) => {
+          const allowedRoles = ROLE_ROUTES[item.href];
+          return !allowedRoles || hasRole(allowedRoles);
+        }).map((item) => {
+          let itemHref = item.href;
+          let itemLabel = item.label;
+
+          if (item.href === '/dashboard' && user) {
+            itemHref = ROLE_HOME[user.accessRole] || '/dashboard';
+            const roleName = user.accessRole.charAt(0) + user.accessRole.slice(1).toLowerCase();
+            itemLabel = `${roleName} Dashboard`;
+          }
+
           const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+          const isActive = pathname === itemHref || pathname.startsWith(itemHref + '/');
 
           return (
             <Link
               key={item.href}
-              href={item.href}
-              title={collapsed ? item.label : undefined}
+              href={itemHref}
+              title={collapsed ? itemLabel : undefined}
               className={cn(
                 'group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all text-xs font-mono relative overflow-hidden',
                 isActive
@@ -107,7 +120,7 @@ export function Sidebar() {
                     exit={{ opacity: 0 }}
                     className="truncate"
                   >
-                    {item.label}
+                    {itemLabel}
                   </motion.span>
                 )}
               </AnimatePresence>

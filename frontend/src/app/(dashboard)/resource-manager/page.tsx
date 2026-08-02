@@ -31,36 +31,36 @@ export default function ResourceManagerPage() {
     return 'Available';
   };
 
-  const getCapacity = (type: string, defaultVal = 5) => {
-    if (!snapshot || !snapshot.resources) return defaultVal;
-    const r = (snapshot.resources || []).find((item) => item.type === type);
+  const getCapacity = (backendType: string, defaultVal = 5) => {
+    if (!snapshot || !snapshot.resourceStatus) return defaultVal;
+    const r = snapshot.resourceStatus[backendType];
     return r ? r.capacity : defaultVal;
   };
 
-  const getAvailable = (type: string, defaultVal = 5) => {
-    if (!snapshot || !snapshot.resources) return defaultVal;
-    const r = (snapshot.resources || []).find((item) => item.type === type);
+  const getAvailable = (backendType: string, defaultVal = 5) => {
+    if (!snapshot || !snapshot.resourceStatus) return defaultVal;
+    const r = snapshot.resourceStatus[backendType];
     return r ? r.available : defaultVal;
   };
 
-  // Define details of the 9 required OS resources
+  // Define details of the required OS resources
   const resourcesList = [
-    { id: '1', name: 'Doctors', type: 'DOCTOR', capacity: getCapacity('DOCTOR', 8), available: getAvailable('DOCTOR', 6) },
-    { id: '2', name: 'Nurses', type: 'NURSE', capacity: 12, available: 9 },
-    { id: '3', name: 'ICU Beds', type: 'ICU_BED', capacity: getCapacity('ICU_BED', 4), available: getAvailable('ICU_BED', 1) },
-    { id: '4', name: 'Operation Theatres', type: 'BED', capacity: getCapacity('BED', 6), available: getAvailable('BED', 4) },
-    { id: '5', name: 'Cabins', type: 'CABIN', capacity: 15, available: 11 },
-    { id: '6', name: 'MRI Machines', type: 'MRI', capacity: 2, available: 2 },
-    { id: '7', name: 'CT Scan Machines', type: 'CT_SCAN', capacity: 3, available: 1 },
-    { id: '8', name: 'Ventilators', type: 'VENTILATOR', capacity: 6, available: 2 },
-    { id: '9', name: 'Ambulances', type: 'AMBULANCE', capacity: 5, available: 4 },
+    { id: '1', name: 'Doctors', type: 'DOCTOR', backendType: 'doctor', capacity: getCapacity('doctor', 20), available: getAvailable('doctor', 20) },
+    { id: '2', name: 'Nurses', type: 'NURSE', backendType: 'nurse', capacity: getCapacity('nurse', 15), available: getAvailable('nurse', 15) },
+    { id: '3', name: 'ICU Beds', type: 'ICU_BED', backendType: 'icuBed', capacity: getCapacity('icuBed', 10), available: getAvailable('icuBed', 10) },
+    { id: '4', name: 'Operation Theatres', type: 'BED', backendType: 'operationTheatre', capacity: getCapacity('operationTheatre', 5), available: getAvailable('operationTheatre', 5) },
+    { id: '5', name: 'Cabins', type: 'CABIN', backendType: 'cabin', capacity: 15, available: 11 },
+    { id: '6', name: 'MRI Machines', type: 'MRI', backendType: 'mriMachine', capacity: getCapacity('mriMachine', 6), available: getAvailable('mriMachine', 6) },
+    { id: '7', name: 'CT Scan Machines', type: 'CT_SCAN', backendType: 'ctScan', capacity: 3, available: 1 },
+    { id: '8', name: 'Ventilators', type: 'VENTILATOR', backendType: 'ventilator', capacity: getCapacity('ventilator', 8), available: getAvailable('ventilator', 8) },
+    { id: '9', name: 'Ambulances', type: 'AMBULANCE', backendType: 'ambulance', capacity: getCapacity('ambulance', 4), available: getAvailable('ambulance', 4) },
   ];
 
   // Map resources to layout variables
   const resourcesData = resourcesList.map((r) => {
     const allocated = r.capacity - r.available;
     const utilization = Math.round((allocated / r.capacity) * 100);
-    const waiting = snapshot ? (snapshot.readyQueue || []).filter((p) => (p.requiredResources || []).includes(r.type as any)).length : 0;
+    const waiting = snapshot ? (snapshot.readyQueue || []).filter((p) => (p.requiredResources || []).includes(r.type as any) || (p.requiredResources || []).includes(r.backendType as any)).length : 0;
     const status = getResourceStatus(r.type, r.capacity, r.available);
     return {
       ...r,
