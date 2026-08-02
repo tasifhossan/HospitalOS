@@ -83,8 +83,8 @@ export default function DoctorPage() {
   return (
     <DoctorLayout>
       <PageShell
-        title="Doctor Portal"
-        subtitle="Process Execution: Patient diagnostic treatment, clinical state mutations & secure records preview"
+        title="Doctor Dashboard"
+        subtitle="Patient diagnostic treatment, clinical records & secure file preview"
       >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left panel: Patient selection and queues */}
@@ -97,12 +97,12 @@ export default function DoctorPage() {
                   <span className="font-bold text-text-primary uppercase">ACTIVE TREATMENT QUEUE</span>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-surface-elevated text-[9px] text-text-muted">
-                  PROCESS LIST
+                  PATIENT LIST
                 </span>
               </div>
               <div className="space-y-2 divide-y divide-border/20 max-h-[220px] overflow-y-auto pr-1">
                 {patients.length === 0 ? (
-                  <p className="text-[10px] text-text-muted text-center py-6">No patient processes registered.</p>
+                  <p className="text-[10px] text-text-muted text-center py-6">No patients currently in queue.</p>
                 ) : (
                   patients.map((p) => (
                     <div
@@ -184,7 +184,7 @@ export default function DoctorPage() {
                     <span className="text-text-primary font-semibold block mt-0.5">{selectedPatient.condition}</span>
                   </div>
                   <div>
-                    <span className="text-text-muted block text-[9px]">PRIORITY DISPATCH STATE</span>
+                    <span className="text-text-muted block text-[9px]">PRIORITY</span>
                     <span className="text-text-primary font-semibold block mt-0.5">{getPriorityLabel(selectedPatient.priority)}</span>
                   </div>
                   <div>
@@ -192,14 +192,14 @@ export default function DoctorPage() {
                     <span className="text-text-primary font-semibold block mt-0.5">DOCTOR | ADMIN</span>
                   </div>
                   <div>
-                    <span className="text-text-muted block text-[9px]">TEMPORAL POSITION</span>
-                    <span className="text-text-primary font-semibold block mt-0.5">ACTIVE EXECUTION</span>
+                    <span className="text-text-muted block text-[9px]">STATUS</span>
+                    <span className="text-text-primary font-semibold block mt-0.5">ACTIVE</span>
                   </div>
                 </div>
 
                 {/* Medical Actions */}
                 <div className="border-t border-border/40 pt-4 space-y-4">
-                  <h4 className="font-bold text-text-primary uppercase text-[10px]">Medical Actions & State Mutation</h4>
+                  <h4 className="font-bold text-text-primary uppercase text-[10px]">Medical Actions & Prescriptions</h4>
                   <form onSubmit={handleMedicalActionSubmit} className="space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="flex flex-col gap-1">
@@ -225,7 +225,7 @@ export default function DoctorPage() {
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                       <span className="badge badge-warning text-[9px] flex items-center font-bold">
-                        TODO: SIGNATURE CHECK
+                        Pending Digital Signature
                       </span>
                       <button
                         type="submit"
@@ -239,18 +239,18 @@ export default function DoctorPage() {
 
                 {/* Resource requests */}
                 <div className="border-t border-border/40 pt-4 space-y-3">
-                  <h4 className="font-bold text-text-primary uppercase text-[10px]">System Lock Allocation Requests</h4>
+                  <h4 className="font-bold text-text-primary uppercase text-[10px]">Resource Requests</h4>
                   <form onSubmit={handleRequestResource} className="flex flex-col sm:flex-row gap-3 items-end">
                     <div className="flex-1 flex flex-col gap-1 w-full">
-                      <label className="text-[9px] text-text-muted">Select Target Lock</label>
+                      <label className="text-[9px] text-text-muted">Select Resource</label>
                       <select
                         value={selectedResource}
                         onChange={(e) => setSelectedResource(e.target.value)}
                         className="bg-surface-elevated border border-border p-2 rounded outline-none text-text-primary focus:border-primary/50"
                       >
-                        <option value="ICU_BED">ICU Bed (Clinical ICU)</option>
-                        <option value="BED">Operation Theatre (General bed)</option>
-                        <option value="DOCTOR">Consulting Doctor semaphore</option>
+                        <option value="ICU_BED">ICU Bed</option>
+                        <option value="BED">Operation Theatre</option>
+                        <option value="DOCTOR">Consulting Doctor</option>
                       </select>
                     </div>
                     <button
@@ -258,7 +258,7 @@ export default function DoctorPage() {
                       className="px-4 py-2 bg-warning hover:bg-warning-hover text-surface rounded font-semibold w-full sm:w-auto flex items-center justify-center gap-1.5"
                     >
                       <Cpu className="w-4 h-4" />
-                      <span>Request Lock</span>
+                      <span>Request Resource</span>
                     </button>
                   </form>
                 </div>
@@ -293,9 +293,54 @@ export default function DoctorPage() {
               </div>
             ) : (
               <div className="card-os py-20 text-center border border-dashed border-border font-mono text-xs">
-                Select a patient process from the left queue to begin diagnosis execution.
+                Select a patient from the queue to begin diagnosis.
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Today's Emergency Cases, Resource Requests Status, Recent Prescriptions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <HeartPulse className="w-4 h-4 text-danger" />
+              <span className="font-bold text-text-primary uppercase">TODAY'S EMERGENCY CASES</span>
+            </div>
+            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+              {patients.filter(p => p.priority === 'HIGH').length === 0 ? (
+                <p className="text-[10px] text-text-muted text-center py-4">No emergency cases today.</p>
+              ) : (
+                patients.filter(p => p.priority === 'HIGH').map(p => (
+                  <div key={p.id} className="flex justify-between items-center py-1.5 border-b border-border/20 last:border-0">
+                    <span className="text-text-primary font-semibold truncate">{p.name}</span>
+                    <span className="text-[8px] font-bold text-danger border border-danger/20 bg-danger/5 px-1.5 py-0.5 rounded">Emergency</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Cpu className="w-4 h-4 text-warning" />
+              <span className="font-bold text-text-primary uppercase">RESOURCE REQUESTS STATUS</span>
+            </div>
+            <div className="space-y-2 text-[10px] text-text-muted">
+              <div className="flex justify-between"><span>ICU Bed Requests:</span><span className="text-text-primary font-bold">0 pending</span></div>
+              <div className="flex justify-between"><span>MRI Requests:</span><span className="text-text-primary font-bold">0 pending</span></div>
+              <div className="flex justify-between"><span>Operation Theatre:</span><span className="text-text-primary font-bold">0 pending</span></div>
+              <div className="flex justify-between"><span>Ambulance:</span><span className="text-text-primary font-bold">0 pending</span></div>
+            </div>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Clock className="w-4 h-4 text-primary" />
+              <span className="font-bold text-text-primary uppercase">RECENT PRESCRIPTIONS</span>
+            </div>
+            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+              <p className="text-[10px] text-text-muted text-center py-4">No recent prescriptions recorded today.</p>
+            </div>
           </div>
         </div>
 

@@ -69,14 +69,14 @@ export default function ReceptionistPage() {
         priority: regPriority,
         requiredResources: regResources as any[],
       });
-      setMessage(`Patient Process [${regName}] successfully initialized in Ready Queue.`);
+      setMessage(`Patient [${regName}] registered successfully.`);
       setRegName('');
       setRegAge('');
       setRegCondition('');
       fetchAllData();
       setTimeout(() => setMessage(''), 3000);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to initialize patient process.');
+      setError(err?.response?.data?.message || 'Failed to register patient.');
     }
   };
 
@@ -120,8 +120,8 @@ export default function ReceptionistPage() {
   return (
     <ReceptionistLayout>
       <PageShell
-        title="Receptionist Portal"
-        subtitle="Process Creation: Thread initialization, process state scheduling & appointment booking"
+        title="Receptionist Dashboard"
+        subtitle="Patient registration, appointment booking & queue management"
       >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left / Middle panels: Action forms */}
@@ -144,7 +144,7 @@ export default function ReceptionistPage() {
               <div className="flex items-center gap-2 pb-2 border-b border-border">
                 <UserPlus className="w-4.5 h-4.5 text-primary" />
                 <span className="font-bold text-text-primary uppercase">
-                  Patient Registration (Process Creation)
+                  Patient Registration
                 </span>
               </div>
               <form onSubmit={handleRegisterPatient} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -192,13 +192,13 @@ export default function ReceptionistPage() {
                 </div>
                 <div className="col-span-1 sm:col-span-2 flex justify-between items-center pt-2">
                   <span className="badge badge-warning text-[9px] flex items-center font-bold">
-                    TODO: CAPTCHA CHECK
+                    Pending Identity Verification
                   </span>
                   <button
                     type="submit"
                     className="px-4 py-1.5 bg-primary hover:bg-primary-hover text-white rounded font-semibold"
                   >
-                    Initialize Process
+                    Register Patient
                   </button>
                 </div>
               </form>
@@ -276,7 +276,7 @@ export default function ReceptionistPage() {
               <div className="flex justify-between items-center pb-2 border-b border-border/60">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4.5 h-4.5 text-primary" />
-                  <span className="font-bold text-text-primary uppercase">SCHEDULER RUNTIME STATE</span>
+                  <span className="font-bold text-text-primary uppercase">QUEUE STATUS</span>
                 </div>
               </div>
               <div className="space-y-2 divide-y divide-border/20 max-h-[220px] overflow-y-auto pr-1">
@@ -284,7 +284,7 @@ export default function ReceptionistPage() {
                   <>
                     <div className="py-1.5 flex justify-between text-[10px]">
                       <span className="text-text-muted">Ready Queue length:</span>
-                      <span className="text-text-primary font-bold">{snapshot.readyQueue.length} patient processes</span>
+                      <span className="text-text-primary font-bold">{snapshot.readyQueue.length} patients</span>
                     </div>
                     <div className="py-1.5 flex justify-between text-[10px]">
                       <span className="text-text-muted">Active Treatment:</span>
@@ -335,6 +335,48 @@ export default function ReceptionistPage() {
                   ))
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Today's Appointments, Today's Admissions, Waiting List, Registration Statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="card-os p-4 border border-border flex flex-col gap-2 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Calendar className="w-4 h-4 text-warning" />
+              <span className="font-bold text-text-primary uppercase text-[10px]">TODAY'S APPOINTMENTS</span>
+            </div>
+            <span className="text-2xl font-bold text-text-primary">{appointments.length}</span>
+            <span className="text-[9px] text-text-muted">Scheduled consultations today</span>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-2 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <UserPlus className="w-4 h-4 text-primary" />
+              <span className="font-bold text-text-primary uppercase text-[10px]">TODAY'S ADMISSIONS</span>
+            </div>
+            <span className="text-2xl font-bold text-text-primary">{patients.length}</span>
+            <span className="text-[9px] text-text-muted">Patients registered today</span>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-2 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Clock className="w-4 h-4 text-danger" />
+              <span className="font-bold text-text-primary uppercase text-[10px]">WAITING LIST</span>
+            </div>
+            <span className="text-2xl font-bold text-text-primary">{snapshot ? snapshot.readyQueue.length : 0}</span>
+            <span className="text-[9px] text-text-muted">Patients in waiting queue</span>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-2 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Activity className="w-4 h-4 text-success" />
+              <span className="font-bold text-text-primary uppercase text-[10px]">REGISTRATION STATS</span>
+            </div>
+            <div className="space-y-1 text-[10px] text-text-muted">
+              <div className="flex justify-between"><span>Emergency:</span><span className="text-danger font-bold">{patients.filter(p => p.priority === 'HIGH').length}</span></div>
+              <div className="flex justify-between"><span>Critical:</span><span className="text-warning font-bold">{patients.filter(p => p.priority === 'MEDIUM').length}</span></div>
+              <div className="flex justify-between"><span>Normal:</span><span className="text-success font-bold">{patients.filter(p => p.priority === 'LOW').length}</span></div>
             </div>
           </div>
         </div>

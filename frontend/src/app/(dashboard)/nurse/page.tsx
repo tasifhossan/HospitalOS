@@ -45,21 +45,21 @@ export default function NursePage() {
 
   const handleUpdateVitals = (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(`Vitals registered successfully for ${selectedPatient?.name}. Committed to clinical locks ledger.`);
+    setMessage(`Vitals registered successfully for ${selectedPatient?.name}.`);
     setNursingNotes('');
     setTimeout(() => setMessage(''), 3000);
   };
 
   const handleRequestResource = (type: string) => {
-    setMessage(`Resource Request [${type}] dispatched to scheduler kernel.`);
+    setMessage(`Resource Request [${type}] submitted successfully.`);
     setTimeout(() => setMessage(''), 3000);
   };
 
   return (
     <NurseLayout>
       <PageShell
-        title="Nurse Portal"
-        subtitle="Resource Monitoring: Patient shifts observation, vitals administration & physical resources telemetry"
+        title="Nurse Dashboard"
+        subtitle="Patient monitoring, vitals administration & physical resources overview"
       >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left panel: Nurse shift details & patients */}
@@ -188,7 +188,7 @@ export default function NursePage() {
 
                     <div className="flex justify-end gap-2">
                       <span className="badge badge-warning text-[9px] flex items-center font-bold">
-                        TODO: MUTATION LOCK
+                        Pending Record Validation
                       </span>
                       <button
                         type="submit"
@@ -202,7 +202,7 @@ export default function NursePage() {
 
                 {/* Nursing Resource Requests */}
                 <div className="border-t border-border/40 pt-4 space-y-3">
-                  <h4 className="font-bold text-text-primary uppercase text-[10px]">Physical Resource Lock Dispatches</h4>
+                  <h4 className="font-bold text-text-primary uppercase text-[10px]">Resource Requests</h4>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => handleRequestResource('Wheelchair')}
@@ -230,9 +230,57 @@ export default function NursePage() {
               </div>
             ) : (
               <div className="card-os py-20 text-center border border-dashed border-border font-mono text-xs">
-                Select a patient process from the left ward list to begin nursing observation logs.
+                Select a patient from the ward list to begin nursing observation.
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Shift Summary, Bed Occupancy, Recent Vitals */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Layers className="w-4 h-4 text-primary" />
+              <span className="font-bold text-text-primary uppercase">SHIFT SUMMARY</span>
+            </div>
+            <div className="space-y-1.5 text-[10px] text-text-muted">
+              <div className="flex justify-between"><span>Shift Type:</span><span className="text-text-primary font-bold">Morning</span></div>
+              <div className="flex justify-between"><span>Hours Remaining:</span><span className="text-text-primary font-bold">4h 30m</span></div>
+              <div className="flex justify-between"><span>Patients Monitored:</span><span className="text-text-primary font-bold">{patients.length}</span></div>
+              <div className="flex justify-between"><span>Vitals Recorded Today:</span><span className="text-success font-bold">12</span></div>
+            </div>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Activity className="w-4 h-4 text-warning" />
+              <span className="font-bold text-text-primary uppercase">BED OCCUPANCY</span>
+            </div>
+            <div className="space-y-1.5 text-[10px] text-text-muted">
+              <div className="flex justify-between"><span>Ward B – Total Beds:</span><span className="text-text-primary font-bold">24</span></div>
+              <div className="flex justify-between"><span>Occupied:</span><span className="text-danger font-bold">18</span></div>
+              <div className="flex justify-between"><span>Available:</span><span className="text-success font-bold">6</span></div>
+              <div className="flex justify-between"><span>Occupancy Rate:</span><span className="text-warning font-bold">75%</span></div>
+            </div>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <HeartPulse className="w-4 h-4 text-success" />
+              <span className="font-bold text-text-primary uppercase">RECENT VITALS</span>
+            </div>
+            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+              {patients.length === 0 ? (
+                <p className="text-[10px] text-text-muted text-center py-4">No vitals recorded yet.</p>
+              ) : (
+                patients.slice(0, 3).map(p => (
+                  <div key={p.id} className="flex justify-between items-center py-1.5 border-b border-border/20 last:border-0 text-[10px]">
+                    <span className="text-text-primary font-semibold truncate">{p.name}</span>
+                    <span className="text-success text-[9px] font-bold">Stable</span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </PageShell>

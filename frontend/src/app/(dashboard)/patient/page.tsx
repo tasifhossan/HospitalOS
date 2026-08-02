@@ -60,7 +60,7 @@ export default function PatientPage() {
   }, [user]);
 
   const handleDownload = async (file: PatientFile) => {
-    setMessage(`Initiating AES secure key decryption stream. Downloading ${file.fileName}...`);
+    setMessage(`Downloading ${file.fileName}...`);
     setTimeout(() => setMessage(''), 3500);
   };
 
@@ -68,7 +68,7 @@ export default function PatientPage() {
     <PatientLayout>
       <PageShell
         title="Patient Portal"
-        subtitle="User Process View: Read-only observation console, secure prescription download & queue check"
+        subtitle="Consultation overview, secure prescription download & queue status"
       >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left panel: Patient identity & queues */}
@@ -77,12 +77,12 @@ export default function PatientPage() {
             <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
               <div className="flex items-center gap-2 pb-2 border-b border-border/60">
                 <User className="w-4 h-4 text-primary" />
-                <span className="font-bold text-text-primary uppercase">PATIENT PROFILE STATE</span>
+                <span className="font-bold text-text-primary uppercase">PATIENT PROFILE</span>
               </div>
               <div className="space-y-1.5 text-[10px] text-text-muted">
                 <div>• <span className="text-text-primary">Registry Name:</span> {user?.email.split('@')[0]}</div>
                 <div>• <span className="text-text-primary">System Access Role:</span> {user?.accessRole}</div>
-                <div>• <span className="text-text-primary">Sandbox State:</span> User Mode Ring 4</div>
+                <div>• <span className="text-text-primary">Account Status:</span> Active</div>
               </div>
             </div>
 
@@ -90,7 +90,7 @@ export default function PatientPage() {
             <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
               <div className="flex items-center gap-2 pb-2 border-b border-border/60">
                 <Activity className="w-4.5 h-4.5 text-success animate-pulse" />
-                <span className="font-bold text-text-primary uppercase">LIVE SCHEDULER STATE</span>
+                <span className="font-bold text-text-primary uppercase">QUEUE STATUS</span>
               </div>
               <div className="space-y-2 mt-1">
                 <div className="flex justify-between">
@@ -99,7 +99,7 @@ export default function PatientPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Expected Wait Time:</span>
-                  <span className="text-text-primary">~2 ticks</span>
+                  <span className="text-text-primary">~10 minutes</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Assigned Doctor:</span>
@@ -148,7 +148,7 @@ export default function PatientPage() {
             <div className="card-os p-5 border border-border space-y-4 font-mono text-xs">
               <div className="flex items-center gap-2 pb-2 border-b border-border">
                 <FileText className="w-4.5 h-4.5 text-primary" />
-                <span className="font-bold text-text-primary uppercase">My Encrypted Vitals Vault</span>
+                <span className="font-bold text-text-primary uppercase">My Clinical Documents</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {files.map((file) => (
@@ -178,6 +178,62 @@ export default function PatientPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Upcoming Visits, Assigned Department, Notification Timeline */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Calendar className="w-4 h-4 text-warning" />
+              <span className="font-bold text-text-primary uppercase">UPCOMING VISITS</span>
+            </div>
+            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+              {appointments.length === 0 ? (
+                <p className="text-[10px] text-text-muted text-center py-4">No upcoming visits scheduled.</p>
+              ) : (
+                appointments.slice(0, 3).map(a => (
+                  <div key={a.id} className="flex justify-between items-center py-1.5 border-b border-border/20 last:border-0 text-[10px]">
+                    <span className="text-text-primary font-semibold truncate">{a.reason || 'Consultation'}</span>
+                    <span className="text-text-muted text-[9px]">{new Date(a.scheduledAt).toLocaleDateString()}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Layers className="w-4 h-4 text-primary" />
+              <span className="font-bold text-text-primary uppercase">ASSIGNED DEPARTMENT</span>
+            </div>
+            <div className="space-y-1.5 text-[10px] text-text-muted">
+              <div className="flex justify-between"><span>Department:</span><span className="text-text-primary font-bold">General Medicine</span></div>
+              <div className="flex justify-between"><span>Ward:</span><span className="text-text-primary font-bold">Ward B - Floor 3</span></div>
+              <div className="flex justify-between"><span>Bed No:</span><span className="text-text-primary font-bold">B-312</span></div>
+              <div className="flex justify-between"><span>Attending Doctor:</span><span className="text-text-primary font-bold">Dr. Roster Active</span></div>
+            </div>
+          </div>
+
+          <div className="card-os p-4 border border-border flex flex-col gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+              <Bell className="w-4 h-4 text-success" />
+              <span className="font-bold text-text-primary uppercase">NOTIFICATION TIMELINE</span>
+            </div>
+            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1 text-[10px]">
+              <div className="flex items-start gap-2 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-success mt-1 shrink-0"></span>
+                <span className="text-text-muted">Your vitals have been updated by the nursing staff.</span>
+              </div>
+              <div className="flex items-start gap-2 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1 shrink-0"></span>
+                <span className="text-text-muted">New prescription added to your clinical documents.</span>
+              </div>
+              <div className="flex items-start gap-2 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-warning mt-1 shrink-0"></span>
+                <span className="text-text-muted">Your next consultation has been scheduled.</span>
               </div>
             </div>
           </div>
