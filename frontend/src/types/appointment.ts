@@ -1,3 +1,5 @@
+import type { StaffMember } from './staff';
+
 export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
 
 export interface Appointment {
@@ -9,6 +11,7 @@ export interface Appointment {
   status: AppointmentStatus;
   createdAt: string;
   updatedAt: string;
+  staff?: StaffMember;
 }
 
 export interface CreateAppointmentPayload {
