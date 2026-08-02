@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// NOTE FOR VIVA/DEPLOYMENT: Swapping to Postgres later is a one-line datasource change.
+// You would change provider to "postgresql" and url to env("DATABASE_URL").
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ComparisonRun {
+  id               String            @id @default(uuid())
+  createdAt        DateTime          @default(now())
+  workloadSeed     String            // Description or seed of patient generator workload
+  patientCount     Int
+  notes            String?
+  algorithmResults AlgorithmResult[]
+}
+
+model AlgorithmResult {
+  id                        String        @id @default(uuid())
+  runId                     String
+  run                       ComparisonRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  algorithm                 String        // SchedulerType e.g., "FCFS", "PRIORITY_AGING", "MULTILEVEL", "SJF"
+  avgWaitMs                 Int
+  maxWaitMs                 Int
+  avgTurnaroundMs           Int
+  maxTurnaroundMs           Int
+  highPriorityAvgWaitMs     Int
+  highPriorityAvgResponseMs Int
+  
+  // Choice: We store utilizationPercent as a single aggregated value (average across all resource types).
+  // This simplifies queries and frontend charting without needing a nested child table.
+  utilizationPercent        Float
+  patientsServed            Int
+}
+
+model RegisteredPatient {
+  id                  String   @id @default(uuid())
+  name                String
+  condition           String
+  priority            String   // "HIGH" | "MEDIUM" | "LOW"
+  requiredResources   String[]
+  status              String   @default("REGISTERED") // "REGISTERED" | "INJECTED_TO_QUEUE" | "CANCELLED"
+  registeredAt        DateTime @default(now())
+  registeredBy        String
+  simulationPatientId String?
+}
+
+model StaffMember {
+  id           String        @id @default(uuid())
+  name         String
+  role         String        // "DOCTOR" | "NURSE"
+  status       String        // "ACTIVE" | "OFF_SHIFT"
+  createdAt    DateTime      @default(now())
+  appointments Appointment[]
+  user         User?
+}
+
+model Appointment {
+  id          String      @id @default(uuid())
+  patientName String
+  staffId     String
+  staff       StaffMember @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime
+  reason      String
+  status      String      @default("SCHEDULED") // "SCHEDULED" | "COMPLETED" | "CANCELLED"
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+enum AccessRole {
+  ADMIN
+  RECEPTIONIST
+  DOCTOR
+  NURSE
+  PATIENT
+}
+
+model User {
+  id             String       @id @default(uuid())
+  email          String       @unique
+  passwordHash   String
+  accessRole     AccessRole
+  staffMemberId  String?      @unique
+  staffMember    StaffMember? @relation(fields: [staffMemberId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  auditLogs      AuditLog[]
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail  String
+  action     String
+  details    Json
+  timestamp  DateTime @default(now())
+}
+
+model PatientFile {
+  id             String            @id @default(uuid())
+  patientId      String            // Patient UUID or reference ID
+  fileName       String
+  fileType       String            // "PRESCRIPTION" | "MEDICAL_REPORT" | "LAB_REPORT" | "MRI" | "CT_SCAN" | "X_RAY" | "INVOICE"
+  encryptedData  String            // Base64 encrypted string
+  iv             String            // Initialization vector
+  uploadedBy     String
+  uploadedAt     DateTime          @default(now())
+  accessAudits   AuditFileAccess[]
+}
+
+model MedicalReport {
+  id             String   @id @default(uuid())
+  patientId      String
+  reportData     String
+  createdAt      DateTime @default(now())
+}
+
+model Prescription {
+  id             String   @id @default(uuid())
+  patientId      String
+  medications    String
+  createdAt      DateTime @default(now())
+}
+
+model LabReport {
+  id             String   @id @default(uuid())
+  patientId      String
+  testResults    String
+  createdAt      DateTime @default(now())
+}
+
+model AuditFileAccess {
+  id             String      @id @default(uuid())
+  fileId         String
+  file           PatientFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  accessorEmail  String
+  accessType     String      // "UPLOAD" | "DOWNLOAD"
+  timestamp      DateTime    @default(now())
+  success        Boolean
+}
+
+model DoctorAssignment {
+  id             String   @id @default(uuid())
+  doctorId       String
+  patientId      String
+  assignedAt     DateTime @default(now())
+}
+
+model BedAllocation {
+  id             String   @id @default(uuid())
+  bedId          String
+  patientId      String
+  allocatedAt    DateTime @default(now())
+}
+
+model ICUAllocation {
+  id             String   @id @default(uuid())
+  icuBedId       String
+  patientId      String
+  allocatedAt    DateTime @default(now())
+}
+
+model UserSession {
+  id             String   @id @default(uuid())
+  userId         String
+  sessionToken   String   @unique
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+}

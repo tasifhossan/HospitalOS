@@ -1,0 +1,49 @@
+{
+  "name": "hospitalos-core",
+  "version": "1.0.0",
+  "description": "Adaptive Resource Scheduling & Secure File Management - Backend (HospitalOS Core Kernel)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev:server": "ts-node-dev --respawn --transpile-only src/server/index.ts",
+    "demo:resourcemanager": "ts-node-dev --transpile-only src/core/ResourceManager.demo.ts",
+    "demo:simulation": "ts-node-dev --transpile-only src/core/SimulationClock.demo.ts",
+    "demo:comparison": "ts-node-dev --transpile-only src/core/schedulers/SchedulerComparison.demo.ts",
+    "demo:deadlock:unsafe": "ts-node-dev --transpile-only src/core/scenarios/DeadlockScenario.demo.ts --mode=unsafe",
+    "demo:deadlock:safe": "ts-node-dev --transpile-only src/core/scenarios/DeadlockScenario.demo.ts --mode=safe",
+    "demo:race:unsafe": "ts-node-dev --transpile-only src/core/scenarios/RaceConditionScenario.demo.ts --mode=unsafe",
+    "demo:race:safe": "ts-node-dev --transpile-only src/core/scenarios/RaceConditionScenario.demo.ts --mode=safe",
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "os",
+    "scheduling",
+    "semaphore",
+    "hospital-simulation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "prisma": "^5.22.0",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.14.9",
+    "socket.io-client": "^4.8.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.4",
+    "vitest": "^4.1.10"
+  }
+}
