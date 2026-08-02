@@ -51,7 +51,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     s.on('connect', () => setIsConnected(true));
     s.on('disconnect', () => setIsConnected(false));
-    s.on('simulation:snapshot', (data: SimulationSnapshot) => setSnapshot(data));
+    s.on('simulation:state', (data: SimulationSnapshot) => setSnapshot(data));
     s.on('deadlock:detected', (data: DeadlockDetectedEvent) => setLastDeadlock(data));
     s.on('scheduler:changed', (data: SchedulerChangedEvent) => setLastSchedulerChange(data));
     s.on('resource:capacityChanged', (data: ResourceCapacityChangedEvent) => setLastCapacityChange(data));
