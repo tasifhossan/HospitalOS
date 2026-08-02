@@ -77,6 +77,14 @@ export function TopHeader() {
           )}
         </div>
 
+        {/* Demo Mode Badge */}
+        {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-500 font-mono text-[9px] font-bold tracking-wider animate-pulse">
+            <span>🟠 DEMO MODE</span>
+            <span className="text-[7.5px] opacity-75 hidden md:inline ml-1">• Presentation Dataset Active</span>
+          </div>
+        )}
+
         {/* WebSocket */}
         <ConnectionBadge isConnected={isConnected} />
 
