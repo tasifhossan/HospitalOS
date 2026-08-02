@@ -68,6 +68,7 @@ export const ROLE_ROUTES: Record<string, AccessRole[]> = {
   '/user-management': ['ADMIN'],
   '/audit-logs': ['ADMIN'],
   '/system-control': ['ADMIN'],
+  '/performance-analytics': ['ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST', 'PATIENT'],
   '/profile': ['ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST', 'PATIENT'],
   '/settings': ['ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST', 'PATIENT'],
 };

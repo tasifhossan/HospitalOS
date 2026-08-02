@@ -37,6 +37,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'User Management', href: '/user-management', icon: Users },
   { label: 'Audit Logs', href: '/audit-logs', icon: ClipboardList },
   { label: 'System Control', href: '/system-control', icon: Sliders },
+  { label: 'Performance Analytics', href: '/performance-analytics', icon: BarChart3 },
   { label: 'Profile', href: '/profile', icon: User },
 ];
 
