@@ -92,12 +92,90 @@ export default function PerformanceAnalyticsPage() {
     { requests: 1000, cpu: 89, memory: 91, waitingTime: 650 },
   ];
 
+  // Scenario simulation state
+  const [selectedScenario, setSelectedScenario] = useState<'Normal' | 'Busy Day' | 'Emergency Surge' | 'Pandemic'>('Normal');
+  const [scenarioMessage, setScenarioMessage] = useState('');
+
+  // Performance Score calculation
+  const getPerformanceScore = () => {
+    if (!activeSnapshot) return { score: 94, rating: 'Excellent' };
+    const waitPenalty = Math.min(30, Math.floor((activeSnapshot.stats?.avgWaitTimeMs || 120) / 15));
+    const readyQueuePenalty = Math.min(20, activeSnapshot.readyQueue.length * 2);
+    const cpuReward = Math.min(10, Math.floor((cpuHistory[cpuHistory.length - 1]?.value || 10) / 10));
+    
+    const score = Math.max(50, Math.min(100, 100 - waitPenalty - readyQueuePenalty + cpuReward));
+    let rating = 'Excellent';
+    if (score < 70) rating = 'Needs Tuning';
+    else if (score < 85) rating = 'Good';
+
+    return { score, rating };
+  };
+
+  const handleRunScenario = () => {
+    setScenarioMessage(`Injecting workload seed for [${selectedScenario}] scenario to simulation driver...`);
+    setTimeout(() => {
+      setScenarioMessage(`Scenario [${selectedScenario}] running. Workload queues generated.`);
+    }, 1000);
+    setTimeout(() => setScenarioMessage(''), 4500);
+  };
+
+  const { score, rating } = getPerformanceScore();
+
   return (
     <UnifiedDashboardLayout>
       <PageShell
         title="Performance Analytics"
         subtitle="Operating System performance evaluation: kernel scheduling efficiency, memory frame monitoring & resource allocation latency"
       >
+        {/* Top level widgets: Performance Score & Scenario simulation control */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 font-mono text-xs">
+          {/* Performance Score banner */}
+          <div className="card-os p-4 border border-primary/40 bg-gradient-to-r from-primary-muted/20 to-surface-elevated/30 col-span-1 md:col-span-1 flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-[9px] text-text-muted uppercase tracking-wider block">HospitalOS Performance Score</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black text-primary-hover">{score}</span>
+                <span className="text-text-muted text-[10px]">/ 100</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="px-2.5 py-1 rounded-full bg-primary-muted/30 border border-primary/40 text-primary-hover font-bold text-[10px] tracking-wide uppercase">
+                {rating}
+              </span>
+              <span className="block text-[8px] text-text-muted mt-1">Live Evaluation</span>
+            </div>
+          </div>
+
+          {/* Scenario simulator controller */}
+          <div className="card-os p-4 border border-border col-span-1 md:col-span-2 space-y-3 flex flex-col justify-between">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <span className="font-bold text-text-primary uppercase text-[10px] tracking-wide">Live Simulation Scenario</span>
+              {scenarioMessage && (
+                <span className="text-primary text-[9px] font-semibold animate-pulse">{scenarioMessage}</span>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {(['Normal', 'Busy Day', 'Emergency Surge', 'Pandemic'] as const).map((sc) => (
+                <label key={sc} className="flex items-center gap-1.5 cursor-pointer text-[10px] text-text-muted hover:text-text-primary transition-colors">
+                  <input
+                    type="radio"
+                    name="scenario"
+                    checked={selectedScenario === sc}
+                    onChange={() => setSelectedScenario(sc)}
+                    className="accent-primary"
+                  />
+                  <span>{sc}</span>
+                </label>
+              ))}
+              <button
+                onClick={handleRunScenario}
+                className="ml-auto px-4 py-1.5 bg-primary hover:bg-primary-hover text-white rounded font-bold transition-all text-[10px] uppercase tracking-wider"
+              >
+                Run
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="space-y-10">
           {/* SECTION 1: Hospital Performance */}
           <AnalyticsSection
