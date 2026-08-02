@@ -18,6 +18,7 @@ export interface CreatePatientPayload {
   condition: string;
   priority: Priority;
   requiredResources: ResourceType[];
+  registeredBy: string;
 }
 
 export interface UpdatePatientPayload {
